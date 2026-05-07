@@ -21,12 +21,10 @@ async function handleSubmit(event) {
         return;
     }
 
-    if (currentQuery !== searchQuery) {
-        page = 1;
-        currentQuery = searchQuery;
-        clearGallery();
-    }
-
+    page = 1;
+    currentQuery = searchQuery;
+    clearGallery();
+    hideLoadMoreButton();
     showLoader();
 
     try {
@@ -36,6 +34,7 @@ async function handleSubmit(event) {
             checkEndOfCollection(page, totalHits);
         }
         else {
+            hideLoadMoreButton();
             iziToast.show({
                 color: '#EF4040',
                 messageColor: '#FAFAFB',
@@ -58,11 +57,14 @@ async function handleSubmit(event) {
 }
 
 async function handleLoadMore() {
-    page += 1;
+    page++;
+    loadMoreBtn.disabled = true;
+    hideLoadMoreButton();
     showLoader();
 
     try {
         const { hits, totalHits } = await getImagesByQuery(currentQuery, page);
+        console.log({ hits, totalHits });
         createGallery(hits);
 
         const galleryItem = document.querySelector(".gallery-item");
@@ -84,6 +86,7 @@ async function handleLoadMore() {
         });
     } finally {
         hideLoader();
+        loadMoreBtn.disabled = false;
     }
 }
 
